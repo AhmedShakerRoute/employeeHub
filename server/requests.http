@@ -1,0 +1,61 @@
+# Day 2 requests. Run `npm run seed` first, then copy real ids from the responses.
+@base = http://localhost:5000/api
+@departmentId = PASTE_A_DEPARTMENT_ID
+@employeeId = PASTE_AN_EMPLOYEE_ID
+
+### Health check
+GET {{base}}/health
+
+### Departments
+GET {{base}}/departments
+
+### New department -> 201
+POST {{base}}/departments
+Content-Type: application/json
+
+{ "name": "Marketing" }
+
+### Same name again -> 409 (unique)
+POST {{base}}/departments
+Content-Type: application/json
+
+{ "name": "Marketing" }
+
+### Employees (with pagination info) -> 200
+GET {{base}}/employees
+
+### Filter + search + paging
+GET {{base}}/employees?department={{departmentId}}&search=a&page=1&limit=2
+
+### One employee (department populated)
+GET {{base}}/employees/{{employeeId}}
+
+### Invalid ObjectId -> 400 (CastError)
+GET {{base}}/employees/123
+
+### Valid but missing id -> 404
+GET {{base}}/employees/64b000000000000000000000
+
+### Hire -> 201
+POST {{base}}/employees
+Content-Type: application/json
+
+{ "name": "Youssef Samir", "jobTitle": "Analyst", "salary": 16000, "department": "{{departmentId}}" }
+
+### Schema validation -> 400 (ValidationError)
+POST {{base}}/employees
+Content-Type: application/json
+
+{ "name": "Yo", "salary": 10, "department": "{{departmentId}}" }
+
+### Update with validation -> 200 or 400
+PUT {{base}}/employees/{{employeeId}}
+Content-Type: application/json
+
+{ "jobTitle": "Senior Developer", "salary": 30000 }
+
+### Delete -> 204
+DELETE {{base}}/employees/{{employeeId}}
+
+### Delete a department that still has staff -> 409
+DELETE {{base}}/departments/{{departmentId}}
